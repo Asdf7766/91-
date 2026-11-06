@@ -1,0 +1,31 @@
+name: Build unsigned IPA
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Show Xcode version on runner
+        run: xcodebuild -version && swift --version
+
+      - name: Install xtool
+        run: brew install xtool-org/tap/xtool
+
+      - name: Build unsigned IPA (no signing)
+        run: |
+          cd XiaoYuanDad
+          xtool dev build --ipa </dev/null
+          echo "--- find ipa ---"
+          find . -name "*.ipa" -o -name "*.app" | head -20
+
+      - name: Upload unsigned IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: XiaoYuanDad-unsigned-ipa
+          path: XiaoYuanDad/**/*.ipa
+          if-no-files-found: error
+          retention-days: 30
